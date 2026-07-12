@@ -1,9 +1,0 @@
-{
-  "name":"Prairie Herbarium",
-  "short_name":"Herbarium",
-  "start_url":"./index.html",
-  "display":"standalone",
-  "background_color":"#f4f1e8",
-  "theme_color":"#314b35",
-  "description":"A personal field collection and herbarium catalog for plant specimens."
-}
