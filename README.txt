@@ -1,32 +1,49 @@
-PRAIRIE HERBARIUM — INSTALLATION AND USE
+PRAIRIE HERBARIUM v3.0 — CLEAN REWRITE
 
-1. EASY DESKTOP TEST
-   Open index.html in Chrome or Edge. Most features work immediately.
+This version was rebuilt from scratch rather than patched from the previous files.
 
-2. GPS, CAMERA, AND INSTALLABLE PHONE APP
-   Browsers require the app to be served from HTTPS (or localhost) for GPS,
-   service-worker offline use, and installation. Upload the entire folder to:
-   - your Wix site's suitable hosted-code area, or
-   - Netlify Drop / GitHub Pages / another HTTPS static host.
+Included:
+- IndexedDB local record storage
+- Compatible JSON restore for older v2 backups
+- JSON backup and CSV export
+- GPS capture and collection-location map
+- Google Maps and OpenStreetMap links
+- Season and multi-select weather fields
+- Press date/time with automatic 24-hour paper-change time
+- Direct Google Calendar reminder link
+- Lifecycle observations with separate photographs
+- Add existing photos and take new photos on Android
+- Drag-and-drop and clipboard paste on PC
+- Photo reordering and primary-image selection
+- Full-screen photo viewer
+- List, sortable table, and Kanban record views
+- Selectable table columns
+- Printable three-column field sheets
+- Visible app version
 
-3. PHONE INSTALLATION
-   Visit the hosted address in Chrome on Android and choose “Add to Home screen.”
-   On iPhone, open in Safari, use Share, then “Add to Home Screen.”
+INSTALLATION
+1. Back up the existing GitHub repository folder.
+2. Replace the repository root files with the six files in this ZIP.
+3. Commit and push through GitHub Desktop.
+4. Open GitHub Pages in an incognito window first and confirm the header shows:
+   3.0.0-clean-rewrite
+5. Restore your existing JSON backup from the Records tab.
+6. After confirming the records and photos, clear old site data on the phone and reload.
 
-4. DATA STORAGE
-   Records and resized photos are stored locally in IndexedDB in that browser.
-   Use “Backup JSON” regularly. CSV exports contain text data but not photos.
+IMPORTANT
+This clean rewrite uses a new IndexedDB database name, so it starts empty by design.
+Your previous records must be restored from JSON once.
 
-5. RECOMMENDED FIELD WORKFLOW
-   - Tap New Specimen.
-   - Accept the generated collection number.
-   - Write the same number on the specimen packet/newspaper.
-   - Capture GPS and field observations.
-   - Add the diagnostic photographs.
-   - Save.
-   - At home, reopen the record to add identification and mounting details.
 
-6. CHATGPT IDENTIFICATION
-   Export or upload the relevant photographs to ChatGPT and include the
-   collection number plus habitat and location notes. Identification from
-   photographs should be treated as provisional for difficult plant groups.
+VERSION 3.1 DRIVE-FRIENDLY MANUAL SYNC
+- Uses one fixed file name: PrairieHerbarium_Master.json.
+- On Android, export opens the system share menu so the file can be sent directly to Google Drive.
+- On desktop browsers, export downloads the fixed-name master file.
+- Import merges by record ID and only replaces a local record when the imported copy is newer.
+- Displays current record count, last export, last import, and an import summary.
+
+
+VERSION 3.1.1 SHARE FALLBACK
+- Added separate Share master file and Download master file buttons.
+- Uses a broadly compatible text MIME type while retaining the .json filename.
+- If browser sharing is denied, the app automatically downloads the master file instead of losing the export.

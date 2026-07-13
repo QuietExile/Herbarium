@@ -2,173 +2,276 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#314b35">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#294936">
   <title>Prairie Herbarium</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <p class="eyebrow">Personal field collection</p>
-      <h1>Prairie Herbarium</h1>
-      <p class="subtitle">Hartford, South Dakota region</p>
-    </div>
-    <button id="newRecordBtn" class="primary">+ New specimen</button>
-  </header>
-
-  <nav class="tabs" aria-label="Main navigation">
-    <button class="tab active" data-view="dashboard">Dashboard</button>
-    <button class="tab" data-view="records">Records</button>
-    <button class="tab" data-view="settings">Settings</button>
+<header class="app-header">
+  <div>
+    <h1>Prairie Herbarium <span class="version-badge">v<span id="appVersion">3.0.0</span></span></h1>
+    <p>Field collection, preservation, lifecycle, photographs, maps, and catalog records</p>
+  </div>
+  <nav class="main-nav" aria-label="Main sections">
+    <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+    <button class="nav-btn" data-view="record">New / Edit Record</button>
+    <button class="nav-btn" data-view="records">Records</button>
+    <button class="nav-btn" data-view="settings">Settings</button>
   </nav>
+</header>
 
-  <main>
-    <section id="dashboardView" class="view active">
-      <div class="stats-grid">
-        <article class="stat"><span id="totalCount">0</span><small>Total specimens</small></article>
-        <article class="stat"><span id="unidentifiedCount">0</span><small>Awaiting ID</small></article>
-        <article class="stat"><span id="mountedCount">0</span><small>Mounted</small></article>
-        <article class="stat"><span id="speciesCount">0</span><small>Identified species</small></article>
+<main>
+  <section id="dashboardView" class="view active">
+    <div class="stats-grid">
+      <article><strong id="statRecords">0</strong><span>Records</span></article>
+      <article><strong id="statIdentified">0</strong><span>Identified</span></article>
+      <article><strong id="statMounted">0</strong><span>Mounted</span></article>
+      <article><strong id="statLifecycle">0</strong><span>Lifecycle entries</span></article>
+    </div>
+    <div class="panel">
+      <div class="section-heading">
+        <div><h2>Recent records</h2><p>Open any record to continue editing it.</p></div>
+        <button id="newRecordBtn" type="button">Create new record</button>
       </div>
+      <div id="recentRecords" class="record-list empty-state">No records yet.</div>
+    </div>
+  </section>
 
-      <article class="panel">
-        <div class="panel-heading">
-          <div><p class="eyebrow">Field workflow</p><h2>Collect without losing context</h2></div>
-        </div>
-        <ol class="workflow">
-          <li><b>Generate a number.</b> Use it on the specimen packet and every photo.</li>
-          <li><b>Capture location and habitat.</b> GPS can be filled with one tap.</li>
-          <li><b>Photograph key features.</b> Whole plant, habitat, flower, leaves, stem, and fruit.</li>
-          <li><b>Press the specimen.</b> Update identification and mounting status later.</li>
-        </ol>
-      </article>
-
-      <article class="panel">
-        <div class="panel-heading">
-          <div><p class="eyebrow">Recent activity</p><h2>Latest specimens</h2></div>
-          <button class="text-button" data-go="records">View all</button>
-        </div>
-        <div id="recentRecords" class="record-list empty-state">No specimens recorded yet.</div>
-      </article>
-    </section>
-
-    <section id="recordsView" class="view">
-      <article class="panel controls-panel">
-        <input id="searchInput" type="search" placeholder="Search number, name, habitat, notes…" aria-label="Search specimens">
-        <select id="statusFilter" aria-label="Filter by status">
-          <option value="">All statuses</option>
-          <option value="field">Field record</option>
-          <option value="pressing">Pressing/drying</option>
-          <option value="identified">Identified</option>
-          <option value="mounted">Mounted</option>
-        </select>
-        <button id="exportCsvBtn">Export CSV</button>
-        <button id="exportJsonBtn">Backup JSON</button>
-        <label class="button-like">Restore JSON<input id="importJsonInput" type="file" accept="application/json" hidden></label>
-        <button id="printFieldCardsBtn">Print field cards</button>
-      </article>
-      <div id="recordsList" class="record-list empty-state">No specimens recorded yet.</div>
-    </section>
-
-    <section id="settingsView" class="view">
-      <article class="panel form-grid">
-        <div class="full"><p class="eyebrow">Collection settings</p><h2>Numbering and ownership</h2></div>
-        <label>Collector name<input id="collectorSetting" type="text" placeholder="David R."></label>
-        <label>Collection prefix<input id="prefixSetting" type="text" maxlength="12" placeholder="DR"></label>
-        <label>Default locality<input id="localitySetting" type="text" placeholder="Hartford, South Dakota"></label>
-        <label>Next sequence number<input id="sequenceSetting" type="number" min="1" step="1"></label>
-        <div class="full actions"><button id="saveSettingsBtn" class="primary">Save settings</button></div>
-      </article>
-      <article class="panel danger-zone">
-        <h2>Local data</h2>
-        <p>Records and photographs remain in this browser unless exported. Make periodic JSON backups.</p>
-        <button id="clearAllBtn" class="danger">Delete all local records</button>
-      </article>
-    </section>
-  </main>
-
-  <dialog id="recordDialog">
-    <form id="recordForm" method="dialog">
-      <header class="dialog-header">
-        <div><p class="eyebrow">Specimen record</p><h2 id="dialogTitle">New specimen</h2></div>
-        <button type="button" id="closeDialogBtn" class="icon-button" aria-label="Close">×</button>
-      </header>
-
+  <section id="recordView" class="view">
+    <form id="recordForm" class="panel form-grid" novalidate>
       <input id="recordId" type="hidden">
-      <div class="form-grid">
-        <label>Collection number<input id="collectionNumber" name="collectionNumber" required></label>
-        <label>Status<select id="recordStatus" name="status"><option value="field">Field record</option><option value="pressing">Pressing/drying</option><option value="identified">Identified</option><option value="mounted">Mounted</option></select></label>
-        <label>Date<input id="collectionDate" name="date" type="date" required></label>
-        <label>Time<input id="collectionTime" name="time" type="time"></label>
-
-        <div class="section-title full"><h3>Location and habitat</h3></div>
-        <label class="full">Location description<input id="locationDescription" name="locationDescription" placeholder="North pasture near windmill"></label>
-        <label>Latitude<input id="latitude" name="latitude" inputmode="decimal"></label>
-        <label>Longitude<input id="longitude" name="longitude" inputmode="decimal"></label>
-        <div class="full inline-actions"><button id="gpsBtn" type="button">Use current GPS</button><span id="gpsStatus" class="muted"></span></div>
-        <label>Habitat<select id="habitat" name="habitat"><option value="">Select…</option><option>Native prairie</option><option>Roadside</option><option>Pasture</option><option>Woodland</option><option>Wetland</option><option>Creek or drainage</option><option>Pond edge</option><option>Lawn</option><option>Cultivated area</option><option>Disturbed ground</option><option>Other</option></select></label>
-        <label>Light<select id="light" name="light"><option value="">Select…</option><option>Full sun</option><option>Partial shade</option><option>Full shade</option></select></label>
-        <label>Soil moisture<select id="soilMoisture" name="soilMoisture"><option value="">Select…</option><option>Dry</option><option>Moist</option><option>Wet</option></select></label>
-        <label>Soil type<select id="soilType" name="soilType"><option value="">Select…</option><option>Loam</option><option>Clay</option><option>Sandy</option><option>Gravelly</option><option>Rocky</option><option>Organic/mucky</option><option>Unknown</option></select></label>
-        <label class="full">Associated or nearby plants<input id="nearbyPlants" name="nearbyPlants"></label>
-
-        <div class="section-title full"><h3>Field observations</h3></div>
-        <label>Growth form<select id="growthForm" name="growthForm"><option value="">Select…</option><option>Wildflower/forb</option><option>Grass</option><option>Sedge/rush</option><option>Shrub</option><option>Tree</option><option>Vine</option><option>Fern</option><option>Aquatic plant</option><option>Other</option></select></label>
-        <label>Estimated height<input id="height" name="height" placeholder="24 in / 60 cm"></label>
-        <label>Flower color<select id="flowerColor" name="flowerColor">
-          <option value="">Select…</option>
-          <option>Not flowering / no visible flower</option>
-          <option>White</option>
-          <option>Cream / ivory</option>
-          <option>Yellow / gold</option>
-          <option>Orange</option>
-          <option>Red / scarlet</option>
-          <option>Pink</option>
-          <option>Magenta / fuchsia</option>
-          <option>Purple / violet</option>
-          <option>Blue</option>
-          <option>Green</option>
-          <option>Brown / tan</option>
-          <option>Black / very dark</option>
-          <option>Multicolored / bicolor</option>
-          <option>Other / uncertain</option>
-        </select></label>
-        <label>Abundance<select id="abundance" name="abundance"><option value="">Select…</option><option>Single plant</option><option>Few plants</option><option>Scattered</option><option>Common</option><option>Dense colony</option></select></label>
-        <label>Phenology<select id="phenology" name="phenology"><option value="">Select…</option><option>Vegetative only</option><option>Budding</option><option>Flowering</option><option>Fruiting/seeding</option><option>Senescent/dormant</option></select></label>
-        <label>Specimen parts<input id="specimenParts" name="specimenParts" placeholder="Stem, leaves, flowers, fruit"></label>
-        <label class="full">Field notes<textarea id="fieldNotes" name="fieldNotes" rows="3" placeholder="Odor, sap, texture, unusual features, land use, slope, moisture…"></textarea></label>
-
-        <div class="section-title full"><h3>Identification</h3></div>
-        <label>Common name<input id="commonName" name="commonName"></label>
-        <label>Scientific name<input id="scientificName" name="scientificName"></label>
-        <label>Family<input id="family" name="family"></label>
-        <label>ID confidence<select id="confidence" name="confidence"><option value="">Unknown</option><option>Tentative</option><option>Probable</option><option>High confidence</option><option>Verified</option></select></label>
-        <label class="full">Identification notes / comparison species<textarea id="identificationNotes" name="identificationNotes" rows="2"></textarea></label>
-
-        <div class="section-title full"><h3>Photographs</h3></div>
-        <label class="full photo-input">Add photos<input id="photoInput" type="file" accept="image/*" capture="environment" multiple></label>
-        <p class="full muted">Recommended: habitat, entire plant, flower front/side, leaf top/underside, stem, fruit or seed.</p>
-        <div id="photoPreview" class="photo-grid full"></div>
-
-        <div class="section-title full"><h3>Preservation and mounting</h3></div>
-        <label>Date placed in press<input id="pressDate" name="pressDate" type="date"></label>
-        <label>Date fully dry<input id="dryDate" name="dryDate" type="date"></label>
-        <label>Date mounted<input id="mountedDate" name="mountedDate" type="date"></label>
-        <label>Mounting sheet / box location<input id="storageLocation" name="storageLocation" placeholder="Binder 1, sheet 14"></label>
-        <label class="full">Preservation notes<textarea id="preservationNotes" name="preservationNotes" rows="2"></textarea></label>
+      <div class="section-heading full">
+        <div><h2 id="recordHeading">New specimen record</h2><p id="recordSubheading">Field data and permanent catalog information.</p></div>
+        <div class="inline-actions">
+          <button id="saveRecordBtn" type="submit">Save record</button>
+          <button id="duplicateRecordBtn" type="button" class="secondary">Duplicate</button>
+          <button id="deleteRecordBtn" type="button" class="danger hidden">Delete</button>
+        </div>
       </div>
-      <footer class="dialog-footer">
-        <button id="deleteRecordBtn" type="button" class="danger hidden">Delete</button>
-        <span class="spacer"></span>
-        <button id="printLabelBtn" type="button">Print herbarium label</button>
-        <button type="submit" class="primary">Save record</button>
-      </footer>
-    </form>
-  </dialog>
 
-  <div id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
+      <div class="section-title full"><h3>Collection identification</h3></div>
+      <label>Collection number<input id="collectionNumber" required></label>
+      <label>Status<select id="status">
+        <option value="field">Field record</option>
+        <option value="pressing">Pressing / drying</option>
+        <option value="identified">Identified</option>
+        <option value="mounted">Mounted</option>
+      </select></label>
+      <label>Collection date<input id="date" type="date" required></label>
+      <label>Collection time<input id="time" type="time"></label>
+      <label>Common name<input id="commonName"></label>
+      <label>Scientific name<input id="scientificName" placeholder="Physalis longifolia"></label>
+      <label>Genus<input id="genus" placeholder="Physalis"></label>
+      <label>Family<input id="family"></label>
+      <label>Identification confidence<select id="confidence">
+        <option value="">Select…</option>
+        <option>Unknown</option><option>Tentative</option><option>Probable</option><option>Very likely</option><option>Verified</option>
+      </select></label>
+      <label class="full">Identification notes<textarea id="identificationNotes" rows="3"></textarea></label>
+
+      <div class="section-title full"><h3>Location and environment</h3></div>
+      <label class="full">Location description<input id="locationDescription" placeholder="Northwest trail, 100 ft west of shelterbelt"></label>
+      <label>Latitude<input id="latitude" inputmode="decimal"></label>
+      <label>Longitude<input id="longitude" inputmode="decimal"></label>
+      <div class="full inline-actions"><button id="gpsBtn" type="button">Use current GPS</button><span id="gpsStatus" class="muted"></span></div>
+
+      <section id="mapPreview" class="map-preview full hidden">
+        <div class="map-preview-header">
+          <strong>Collection location</strong>
+          <div>
+            <a id="googleMapsLink" class="button-link" target="_blank" rel="noopener">Open Google Maps</a>
+            <a id="openStreetMapLink" class="button-link secondary" target="_blank" rel="noopener">OpenStreetMap</a>
+          </div>
+        </div>
+        <iframe id="locationMap" title="Collection map" loading="lazy"></iframe>
+      </section>
+
+      <label>Habitat<select id="habitat">
+        <option value="">Select…</option>
+        <option>Native prairie</option><option>Roadside</option><option>Pasture</option><option>Woodland</option>
+        <option>Wetland</option><option>Creek or drainage</option><option>Pond edge</option><option>Lawn</option>
+        <option>Cultivated area</option><option>Disturbed ground</option><option>Other</option>
+      </select></label>
+      <label>Season<select id="season">
+        <option value="">Select…</option><option>Spring</option><option>Summer</option><option>Fall / autumn</option><option>Winter</option>
+      </select></label>
+      <label>Light<select id="light"><option value="">Select…</option><option>Full sun</option><option>Partial shade</option><option>Full shade</option></select></label>
+      <label>Soil moisture<select id="soilMoisture"><option value="">Select…</option><option>Dry</option><option>Moist</option><option>Wet</option><option>Standing water</option></select></label>
+      <label>Soil type<select id="soilType"><option value="">Select…</option><option>Clay</option><option>Loam</option><option>Sandy</option><option>Gravelly</option><option>Rocky</option><option>Organic / muck</option><option>Unknown</option></select></label>
+      <label>Weather conditions
+        <select id="weatherConditions" multiple size="8">
+          <option>Clear / sunny</option><option>Partly cloudy</option><option>Cloudy / overcast</option><option>Fog / mist</option>
+          <option>Light rain / drizzle</option><option>Rain</option><option>Heavy rain / thunderstorm</option><option>Snow / sleet</option>
+          <option>Calm</option><option>Breezy</option><option>Windy</option>
+          <option>Hot</option><option>Warm</option><option>Mild</option><option>Cool</option><option>Cold</option><option>Frost / freezing</option>
+          <option>Humid</option><option>Dry air</option><option>After recent rain</option>
+        </select>
+        <small class="muted">Select all that apply. On a PC use Ctrl-click.</small>
+      </label>
+      <label class="full">Nearby plants<textarea id="nearbyPlants" rows="2"></textarea></label>
+
+      <div class="section-title full"><h3>Plant description</h3></div>
+      <label>Growth form<select id="growthForm"><option value="">Select…</option><option>Wildflower / forb</option><option>Grass</option><option>Sedge</option><option>Rush</option><option>Shrub</option><option>Tree</option><option>Vine</option><option>Fern</option><option>Aquatic plant</option><option>Other</option></select></label>
+      <label>Height<input id="height" placeholder="36–40 in"></label>
+      <label>Spread / width<input id="spread"></label>
+      <label>Flower color<select id="flowerColor">
+        <option value="">Select…</option><option>Not flowering / no visible flower</option><option>White</option><option>Cream / ivory</option>
+        <option>Yellow / gold</option><option>Orange</option><option>Red / scarlet</option><option>Pink</option>
+        <option>Magenta / fuchsia</option><option>Purple / violet</option><option>Blue</option><option>Green</option>
+        <option>Brown / tan</option><option>Black / very dark</option><option>Multicolored / bicolor</option><option>Other / uncertain</option>
+      </select></label>
+      <label>Abundance<select id="abundance"><option value="">Select…</option><option>Single plant</option><option>Scattered</option><option>Occasional</option><option>Common</option><option>Abundant</option><option>Large colony</option></select></label>
+      <label>Current life stage<select id="phenology">
+        <option value="">Select…</option><option>Germinating</option><option>Seedling</option><option>Vegetative growth</option><option>Budding</option>
+        <option>First flowering</option><option>Peak flowering</option><option>Late flowering</option><option>Immature fruit</option>
+        <option>Mature fruit / seed</option><option>Seed dispersal</option><option>Senescent</option><option>Dormant</option>
+      </select></label>
+      <label class="full">Field notes<textarea id="fieldNotes" rows="4"></textarea></label>
+
+      <div class="section-title full"><h3>Specimen photographs</h3></div>
+      <div class="full photo-add-panel">
+        <div class="photo-add-actions">
+          <button id="choosePhotoBtn" type="button">Add existing photos</button>
+          <button id="takePhotoBtn" type="button" class="secondary">Take photo</button>
+          <input id="photoInput" type="file" accept="image/*" multiple hidden>
+          <input id="photoCameraInput" type="file" accept="image/*" capture="environment" hidden>
+        </div>
+        <div id="photoDropZone" class="photo-drop-zone" tabindex="0">Drag photographs here, or paste an image with Ctrl+V</div>
+        <p class="muted">The first photograph is the primary image. Drag images to reorder them. Click an image to view it full size.</p>
+      </div>
+      <div id="photoPreview" class="photo-grid full"></div>
+
+      <div class="section-title full"><h3>Pressing, drying, and mounting</h3></div>
+      <label>Date placed in press<input id="pressDate" type="date"></label>
+      <label>Time placed in press<input id="pressTime" type="time"></label>
+      <label>Recommended paper-change date<input id="paperChangeDate" type="date" readonly></label>
+      <label>Recommended paper-change time<input id="paperChangeTime" type="time" readonly></label>
+      <div class="full inline-actions"><button id="calendarReminderBtn" type="button">Open reminder in Google Calendar</button></div>
+      <label>Date fully dry<input id="dryDate" type="date"></label>
+      <label>Date mounted<input id="mountedDate" type="date"></label>
+      <label>Storage location<input id="storageLocation"></label>
+      <label class="full">Preservation notes<textarea id="preservationNotes" rows="3"></textarea></label>
+
+      <div class="section-title full"><h3>Lifecycle observations</h3></div>
+      <div class="full">
+        <button id="addLifecycleBtn" type="button">Add lifecycle observation</button>
+      </div>
+      <div id="lifecycleList" class="lifecycle-list full empty-state">No lifecycle observations yet.</div>
+
+      <div id="lifecycleEditor" class="lifecycle-editor full hidden">
+        <input id="lifecycleId" type="hidden">
+        <div class="section-heading">
+          <div><h3>Lifecycle observation</h3><p>Record a later visit to the same plant or population.</p></div>
+          <button id="closeLifecycleBtn" type="button" class="secondary">Close</button>
+        </div>
+        <div class="form-grid">
+          <label>Date<input id="lifecycleDate" type="date"></label>
+          <label>Time<input id="lifecycleTime" type="time"></label>
+          <label>Development stage<select id="lifecycleStage">
+            <option value="">Select…</option><option>Germinating</option><option>Seedling</option><option>Vegetative growth</option><option>Budding</option>
+            <option>First flowering</option><option>Peak flowering</option><option>Late flowering</option><option>Immature fruit</option>
+            <option>Mature fruit / seed</option><option>Seed dispersal</option><option>Senescent</option><option>Dormant</option>
+          </select></label>
+          <label>Plant height<input id="lifecycleHeight"></label>
+          <label>Spread / width<input id="lifecycleSpread"></label>
+          <label>Condition<select id="lifecycleCondition"><option value="">Select…</option><option>Excellent</option><option>Healthy</option><option>Stressed</option><option>Damaged</option><option>Declining</option><option>Dead / dormant</option></select></label>
+          <label>Flower abundance<select id="lifecycleFlowerAbundance"><option value="">Select…</option><option>None</option><option>Few</option><option>Moderate</option><option>Many</option><option>Peak bloom</option></select></label>
+          <label>Fruit / seed stage<input id="lifecycleFruitStage"></label>
+          <label>Leaf condition<input id="lifecycleLeafCondition"></label>
+          <label class="full">Weather / environmental notes<textarea id="lifecycleWeather" rows="2"></textarea></label>
+          <label class="full">Observation notes<textarea id="lifecycleNotes" rows="3"></textarea></label>
+
+          <div class="section-title full"><h4>Stage photographs</h4></div>
+          <div class="full photo-add-panel">
+            <div class="photo-add-actions">
+              <button id="chooseStagePhotoBtn" type="button">Add existing photos</button>
+              <button id="takeStagePhotoBtn" type="button" class="secondary">Take photo</button>
+              <input id="stagePhotoInput" type="file" accept="image/*" multiple hidden>
+              <input id="stagePhotoCameraInput" type="file" accept="image/*" capture="environment" hidden>
+            </div>
+            <div id="stagePhotoDropZone" class="photo-drop-zone" tabindex="0">Drag stage photographs here, or paste an image with Ctrl+V</div>
+          </div>
+          <div id="stagePhotoPreview" class="photo-grid full"></div>
+          <div class="full inline-actions">
+            <button id="saveLifecycleBtn" type="button">Save lifecycle observation</button>
+            <button id="deleteLifecycleBtn" type="button" class="danger hidden">Delete observation</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <section id="recordsView" class="view">
+    <div class="panel">
+      <div class="section-heading">
+        <div><h2>Records</h2><p>Search, sort, filter, export, restore, and print.</p></div>
+        <div class="inline-actions">
+          <button id="shareMasterBtn" type="button">Share master file to Drive</button>
+          <button id="downloadMasterBtn" type="button" class="secondary">Download master file</button>
+          <button id="importMasterBtn" type="button">Load master file from Drive</button>
+          <input id="restoreInput" type="file" accept=".json,application/json,text/json" hidden>
+          <button id="exportCsvBtn" type="button" class="secondary">Export CSV</button>
+          <button id="printFieldCardsBtn" type="button" class="secondary">Print field cards</button>
+        </div>
+      </div>
+      <section class="sync-panel">
+        <div>
+          <h3>Manual Google Drive sync</h3>
+          <p>Use one file named <strong>PrairieHerbarium_Master.json</strong>. On Android, try <strong>Share master file to Drive</strong>. If sharing is unavailable or denied, use <strong>Download master file</strong>, then upload or replace it from the Google Drive app.</p>
+        </div>
+        <div class="sync-status-grid">
+          <div><span>Current records</span><strong id="syncRecordCount">0</strong></div>
+          <div><span>Last export</span><strong id="lastExportStatus">Never</strong></div>
+          <div><span>Last import</span><strong id="lastImportStatus">Never</strong></div>
+        </div>
+      </section>
+      <div id="restoreStatus" class="restore-status muted"></div>
+      <div class="records-toolbar">
+        <input id="searchInput" placeholder="Search names, family, genus, habitat, location…">
+        <select id="statusFilter"><option value="">All statuses</option><option value="field">Field record</option><option value="pressing">Pressing / drying</option><option value="identified">Identified</option><option value="mounted">Mounted</option></select>
+        <input id="dateFilter" type="date" title="Filter by collection date">
+        <div class="view-switcher">
+          <button type="button" class="view-mode active" data-record-view="list">List</button>
+          <button type="button" class="view-mode" data-record-view="table">Table</button>
+          <button type="button" class="view-mode" data-record-view="kanban">Kanban</button>
+        </div>
+        <details id="columnChooser" class="column-chooser hidden">
+          <summary>Table columns</summary>
+          <div id="columnOptions" class="column-options"></div>
+        </details>
+      </div>
+      <div id="recordsList" class="record-list empty-state">No records found.</div>
+    </div>
+  </section>
+
+  <section id="settingsView" class="view">
+    <form id="settingsForm" class="panel form-grid">
+      <div class="section-heading full"><div><h2>Settings</h2><p>Collection numbering and default information.</p></div><button type="submit">Save settings</button></div>
+      <label>Collector<input id="settingCollector"></label>
+      <label>Collection prefix<input id="settingPrefix" maxlength="8"></label>
+      <label>Default locality<input id="settingLocality"></label>
+      <label>Next sequence number<input id="settingSequence" type="number" min="1"></label>
+      <p class="full muted">Running version: <strong id="settingsVersion">3.0.0</strong></p>
+    </form>
+  </section>
+</main>
+
+<div id="photoLightbox" class="photo-lightbox hidden" role="dialog" aria-modal="true">
+  <button id="lightboxClose" class="lightbox-close" type="button">×</button>
+  <button id="lightboxPrev" class="lightbox-nav lightbox-prev" type="button">‹</button>
+  <div id="lightboxViewport" class="lightbox-viewport"><img id="lightboxImage" alt="Full-size plant photograph"></div>
+  <button id="lightboxNext" class="lightbox-nav lightbox-next" type="button">›</button>
+  <div class="lightbox-footer">
+    <span id="lightboxCounter"></span>
+    <button id="lightboxZoomOut" type="button">−</button>
+    <button id="lightboxReset" type="button">Fit</button>
+    <button id="lightboxZoomIn" type="button">+</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
 </body>
 </html>
